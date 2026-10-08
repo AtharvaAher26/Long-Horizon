@@ -1,0 +1,9 @@
+@"
+venv/
+.env
+__pycache__/
+*.pyc
+data/
+"@ | Set-Content .gitignore -Encoding ascii
+
+Get-Content .gitignore
