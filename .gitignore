@@ -1,9 +1,1 @@
-@"
-venv/
-.env
-__pycache__/
-*.pyc
-data/
-"@ | Set-Content .gitignore -Encoding ascii
-
-Get-Content .gitignore
+@("venv/",".env","__pycache__/","*.pyc","data/","sandbox/") | Set-Content .gitignore -Encoding ascii
