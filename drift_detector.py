@@ -81,10 +81,11 @@ def combine(embedding_signal: float, judge_alignment: float | None) -> tuple[flo
 # ------------------------------ the detector ------------------------------
 
 class DriftDetector:
-    def __init__(self, ledger: GoalLedger):
+    def __init__(self, ledger: GoalLedger, log_path: Path | None = None):
         self.goal_text = ledger.goal_text()      # raises LedgerNotSetError if empty
         self.goal_embedding = embed(self.goal_text)   # embedded ONCE — reuse every check
-
+        self.log_path = Path(log_path) if log_path else DRIFT_LOG
+    
     def check(self, current_state: str, use_judge: bool = True) -> DriftReport:
         sim = cosine(embed(current_state), self.goal_embedding)
         e_signal = sim_to_signal(sim)
@@ -107,8 +108,8 @@ class DriftDetector:
             recommended_action=action_for(level),
         )
 
-        DRIFT_LOG.parent.mkdir(parents=True, exist_ok=True)
-        with DRIFT_LOG.open("a", encoding="utf-8") as f:
+        self.log_path.parent.mkdir(parents=True, exist_ok=True)
+        with self.log_path.open("a", encoding="utf-8") as f:
             f.write(json.dumps({
                 "state": current_state[:200],
                 "similarity": round(sim, 3),
