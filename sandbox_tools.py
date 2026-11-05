@@ -3,12 +3,27 @@ sandbox_tools.py — Safe file tools for the demo agent.
 All paths are jailed inside sandbox/ (no "..", no absolute paths).
 """
 import json
+import ntpath
+import re
 from pathlib import Path
 
 SANDBOX = Path("sandbox")
 
+# Windows-style absolute paths must be blocked on EVERY OS: on POSIX,
+# "C:/Windows/evil.txt" parses as a harmless relative name, but the jail's
+# contract is OS-independent — a drive-letter or UNC path is never a valid
+# sandbox-relative path.
+_WINDOWS_DRIVE = re.compile(r"^[a-zA-Z]:")
+
+
+def _is_windows_absolute(path: str) -> bool:
+    return bool(_WINDOWS_DRIVE.match(path)) or ntpath.isabs(path)
+
 
 def _safe_path(path: str) -> Path:
+    raw = str(path)
+    if _is_windows_absolute(raw) or raw.startswith(("//", "\\\\")):
+        raise ValueError(f"absolute path not allowed in sandbox: {path}")
     p = SANDBOX / path
     resolved = p.resolve()
     if not str(resolved).startswith(str(SANDBOX.resolve())):

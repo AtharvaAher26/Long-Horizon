@@ -244,10 +244,10 @@ class IntegrityLoop:
 
             # 6) drift check (cadence) — protected runs only
             if self.protect and step % self.check_every == 0 and turn["events"]:
-                last = turn["events"][-1]
-                state = (f"last action: {last['tool']} {last['args'][:200]} | "
-                         f"result: {last['result'][:200]}")
-                report = self.detector.check(state)
+                # Judge the agent's accumulated state (sandbox files + recent
+                # working context), not just a truncated fragment of the
+                # last tool call — drift is a property of the whole state.
+                report = self.detector.check(self.build_state_message())
                 interv = self.repair.handle_report(report)
                 color = {"LOW": "green", "MEDIUM": "yellow",
                          "HIGH": "dark_orange", "CRITICAL": "red"}[report.level]

@@ -66,3 +66,4 @@ def test_action_mapping_matches_doc():
     assert action_for("LOW") == "continue"
     assert "soft_correction" in action_for("MEDIUM")
     assert "strong_repair" in action_for("HIGH")
+    assert "strong_repair" in action_for("CRITICAL")
